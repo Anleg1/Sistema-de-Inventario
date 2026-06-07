@@ -11,9 +11,9 @@ class CategoriaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index() //En esta parte me guie del ejemplo que mando para la clases
     {
-        return Categoria::all();
+        return response()->json(Categoria::all(),200);
        
     }
 
@@ -22,8 +22,17 @@ class CategoriaController extends Controller
      */
     public function store(Request $request)
     {
-       $categoria = Categoria::create($request->all());
-        return response()->json($categoria, 201); 
+       $request->validate([
+            'nombre' => 'required|max:100',
+            'descripcion' => 'required|max:255',
+        ]);
+
+        $categoria = Categoria::create($request->all());
+
+        return response()->json([
+            'message' => 'Categoría registrada correctamente',
+            'data' => $categoria
+        ], 201);
     }
     /**
      * Display the specified resource.

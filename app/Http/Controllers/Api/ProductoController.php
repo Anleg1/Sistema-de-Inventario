@@ -11,9 +11,9 @@ class ProductoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index()  //En esta parte me guie del ejemplo que mando para la clases
     {
-        return Producto::all();
+        return response()->json(Producto::all(), 200);
     }
 
     /**
@@ -21,8 +21,18 @@ class ProductoController extends Controller
      */
     public function store(Request $request)
     {
-       $producto = Producto::create($request->all());
-       return response()->json($producto, 201);
+       $request->validate([
+        'nombre' => 'required|max:100',
+        'precio' => 'required',
+        'stock' => 'required'
+        ]);
+
+        $producto = Producto::create($request->all());
+
+        return response()->json([
+            'message' => 'Producto registrado correctamente',
+            'data' => $producto
+        ], 201);
     }
 
     /**
