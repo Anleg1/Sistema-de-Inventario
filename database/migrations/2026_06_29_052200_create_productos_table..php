@@ -6,15 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
+    /** //Tuve que renombrar las migraciones ya que las tablas estaban mal ordenadas 
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('categorias', function (Blueprint $table) {
+        Schema::create('productos', function (Blueprint $table) {
             $table->id();
             $table->string('nombre');
-            $table->string('descripcion');
+            $table->decimal('precio', 8, 2);
+            $table->integer('stock');
+            $table->foreignId('categoria_id')
+                ->constrained('categorias')
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }
@@ -24,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categorias');
+        Schema::dropIfExists('productos');
     }
 };
