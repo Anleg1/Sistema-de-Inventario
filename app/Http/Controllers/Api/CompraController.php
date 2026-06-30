@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Compra;
 use Illuminate\Http\Request;
 
 class CompraController extends Controller
@@ -12,7 +13,10 @@ class CompraController extends Controller
      */
     public function index()
     {
-        //
+        return response()->json(
+            Compra::with('proveedor','detalles')->get(),
+            200
+        );
     }
 
     /**
@@ -20,7 +24,18 @@ class CompraController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'fecha' => 'required|date',
+            'total' => 'required|numeric',
+            'proveedor_id' => 'required|exists:proveedores,id'
+        ]);
+
+        $compra = Compra::create($request->all());
+
+        return response()->json([
+            'message' => 'Compra registrada correctamente',
+            'data' => $compra
+        ], 201);
     }
 
     /**
@@ -28,7 +43,15 @@ class CompraController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $compra = Compra::with('proveedor','detalles')->find($id);
+
+        if (!$compra) {
+            return response()->json([
+                'message' => 'Compra no encontrada'
+            ], 404);
+        }
+
+        return response()->json($compra,200);
     }
 
     /**
@@ -36,7 +59,26 @@ class CompraController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $compra = Compra::find($id);
+
+        if (!$compra) {
+            return response()->json([
+                'message' => 'Compra no encontrada'
+            ],404);
+        }
+
+        $request->validate([
+            'fecha' => 'required|date',
+            'total' => 'required|numeric',
+            'proveedor_id' => 'required|exists:proveedores,id'
+        ]);
+
+        $compra->update($request->all());
+
+        return response()->json([
+            'message' => 'Compra actualizada correctamente',
+            'data' => $compra
+        ],200);
     }
 
     /**
@@ -44,6 +86,18 @@ class CompraController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $compra = Compra::find($id);
+
+        if(!$compra){
+            return response()->json([
+                'message'=>'Compra no encontrada'
+            ],404);
+        }
+
+        $compra->delete();
+
+        return response()->json([
+            'message'=>'Compra eliminada correctamente'
+        ],200);
     }
 }

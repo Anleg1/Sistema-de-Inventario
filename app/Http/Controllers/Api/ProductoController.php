@@ -13,7 +13,10 @@ class ProductoController extends Controller
      */
     public function index()  //En esta parte me guie del ejemplo que mando para la clases
     {
-        return response()->json(Producto::all(), 200);
+        return response()->json(
+            Producto::with('categoria')->get(),
+            200
+        );
     }
 
     /**
@@ -22,9 +25,10 @@ class ProductoController extends Controller
     public function store(Request $request)
     {
        $request->validate([
-        'nombre' => 'required|max:100',
-        'precio' => 'required',
-        'stock' => 'required'
+            'nombre' => 'required|max:100',
+            'precio' => 'required',
+            'stock' => 'required',
+            'categoria_id' => 'required|exists:categorias,id'
         ]);
 
         $producto = Producto::create($request->all());
@@ -40,7 +44,15 @@ class ProductoController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $producto = Producto::with('categoria')->find($id);
+
+        if (!$producto) {
+            return response()->json([
+                'message' => 'Producto no encontrado'
+            ], 404);
+        }
+
+        return response()->json($producto, 200);
     }
 
     /**
@@ -48,7 +60,27 @@ class ProductoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $producto = Producto::find($id);
+
+        if (!$producto) {
+            return response()->json([
+                'message' => 'Producto no encontrado'
+            ], 404);
+        }
+
+        $request->validate([
+            'nombre' => 'required|max:100',
+            'precio' => 'required|numeric',
+            'stock' => 'required|integer',
+            'categoria_id' => 'required|exists:categorias,id'
+        ]);
+
+        $producto->update($request->all());
+
+        return response()->json([
+            'message' => 'Producto actualizado correctamente',
+            'data' => $producto
+        ], 200);
     }
 
     /**
@@ -56,6 +88,18 @@ class ProductoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $producto = Producto::find($id);
+
+        if (!$producto) {
+            return response()->json([
+                'message' => 'Producto no encontrado'
+            ], 404);
+        }
+
+        $producto->delete();
+
+        return response()->json([
+            'message' => 'Producto eliminado correctamente'
+        ], 200);
     }
 }
